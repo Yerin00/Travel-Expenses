@@ -2,5 +2,9 @@
   /* text-align: center; */
 }
 
+*{
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
 .delete {display:inline-block;*display:inline;}
 .delete:after {display: inline-block;content: "\00d7";}

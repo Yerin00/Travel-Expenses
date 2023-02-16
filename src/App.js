@@ -122,7 +122,7 @@ function App() {
       <header className="p-2 font-bold text-lg">여행경비 계산기</header>
       <div className="p-4">
 
-        <p className="text-red-400">환율은 이틀~하루전 환율값을 사용하며 현재 환율과 일치하지않을 수있습니다.</p>
+        <p className="text-red-400 text-xs">환율은 이틀~하루전 환율값을 사용하며 현재 환율과 일치하지않을 수있습니다.</p>
         {/* 화폐단위선택 */}
         <div className="grid grid-cols-2 gap-4">
           <div>
