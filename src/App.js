@@ -102,6 +102,8 @@ function App() {
       memo:memo,
       unit_1: expenseHistory,
       unit_2: null}) // 배열 시작부분에 항목 추가
+    // 남은 경비 계산
+
     // 모든 값 초기화
     setMemo('')
     setExpense1('')
@@ -178,10 +180,25 @@ function App() {
         {/* 추가-사용 금액 계산 */}
         <label>추가-사용 금액 계산</label>
         <div className="bg-gray-100 p-4">
-          <input value={memo} onChange={(e)=>setMemo(e.target.value)} type="text" placeholder="메모" aria-label="memo" className="border-b border-gray-500 bg-transparent text-gray-700 mr-3 py-1 px-2 focus:outline-none"/>
-          <input value={expense1} onChange={(e)=>setExpense1(e.target.value)} type="text" placeholder="단위 1" aria-label="unit1" className="border-b border-gray-500 bg-transparent text-gray-700 mr-3 py-1 px-2 focus:outline-none"/>
-          <input value={expense2} onChange={(e)=>setExpense2(e.target.value)} type="text" placeholder="단위 2" aria-label="unit2" className="border-b border-gray-500 bg-transparent text-gray-700 mr-3 py-1 px-2 focus:outline-none"/>
-          <button onClick={addExpense} className="bg-white shadow-lg p-2 rounded-lg">추가하기</button>
+          <div className="flex flex-cols-2">
+            <div className="flex flex-col">
+              <button>
+                <img src='plus.png'/>
+              </button>
+              <button>
+                <img src='minus.png'/>
+              </button>
+            </div>
+            <div>
+              <input value={memo} onChange={(e)=>setMemo(e.target.value)} type="text" placeholder="메모" aria-label="memo" className="border-b border-gray-500 bg-transparent text-gray-700 mr-3 py-1 px-2 focus:outline-none"/>
+              <div className="flex flex-row">
+                <input value={expense1} onChange={(e)=>setExpense1(e.target.value)} type="text" placeholder="단위 1" aria-label="unit1" className="border-b border-gray-500 bg-transparent text-gray-700 mr-2 py-1 px-2 w-36 focus:outline-none"/>
+                <p className="pt-1">or</p>
+                <input value={expense2} onChange={(e)=>setExpense2(e.target.value)} type="text" placeholder="단위 2" aria-label="unit2" className="border-b border-gray-500 bg-transparent text-gray-700 ml-2 py-1 px-2 w-36 focus:outline-none"/>
+              </div>
+            </div>
+          </div>
+          <button onClick={addExpense} className="bg-white shadow-lg p-2 mt-2 rounded-lg">추가하기</button>
         </div>
         {/* 추가-사용 내역 목록 */}
         {expenseHistory.map((history, index)=>(
@@ -207,7 +224,7 @@ function App() {
       {/* footer */}
       <footer className="bg-gray-100 p-10 pb-40 text-center">
         @choi yerin&nbsp;
-        <a href='https://github.com/Yerin00' target='_blank' className="font-bold">Github</a>
+        <a href='https://github.com/Yerin00' target='_blank' rel="noreferrer" className="font-bold">Github</a>
       </footer>
     </div>
   );
