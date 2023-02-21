@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState, useEffect } from 'react';
 import{ NumericFormat } from 'react-number-format'; // 1,000 : , 찍는 format 라이브러리
@@ -23,39 +22,54 @@ function App() {
 
   const [expectRestExpenses1, setExpectRestExpenses1] = useState(0)
   const [expectRestExpenses2, setExpectRestExpenses2] = useState(0)
-  let date;
   const [ratio, setRatio] = useState(0)
-
+  
   const [isPlus, setIsPlus] = useState(false)
+  let date;
 
-  function deleteHistory(){
-    // expenseHistory 목록에서 삭제
-    //expenseHistory.filter()
+  function deleteHistory(history){
+    // 배열에서 제거
+    setExpenseHistory(expenseHistory.filter(item => item.id !== parseInt(history.id)))
     // 남은 경비 다시 계산
-
+    if(history.isPlus === true){ // + -> -
+      setRestExpenses1(restExpenses1 - history.unit_1)
+      setRestExpenses2(restExpenses2 - history.unit_2)
+    } else if (history.isPlus === false) { // - -> +
+      setRestExpenses1(restExpenses1 + history.unit_1)
+      setRestExpenses2(restExpenses2 + history.unit_2)
+    }
   }
 
   function save(){
-    localStorage.setItem('firstUnit', firstUnit)
-    localStorage.setItem('secondUnit', secondUnit)
-    localStorage.setItem('initExpenses1', initExpenses1)
-    localStorage.setItem('initExpenses2', initExpenses2)
-    localStorage.setItem('restExpenses1', restExpenses1)
-    localStorage.setItem('restExpenses2', restExpenses2)
-    localStorage.setItem('expenseHistory', JSON.stringify(expenseHistory));
+    localStorage.setItem('name', JSON.stringify(name))
+    localStorage.setItem('firstUnit', JSON.stringify(firstUnit))
+    localStorage.setItem('secondUnit', JSON.stringify(secondUnit))
+    localStorage.setItem('initExpenses1', JSON.stringify(initExpenses1))
+    localStorage.setItem('initExpenses2', JSON.stringify(initExpenses2))
+    localStorage.setItem('restExpenses1', JSON.stringify(restExpenses1))
+    localStorage.setItem('restExpenses2', JSON.stringify(restExpenses2))
+    localStorage.setItem('expenseHistory', JSON.stringify(expenseHistory))
   }
 
   // 1. 페이지에 접속하면
   useEffect(()=>{
 
     // 2. localStorage의 데이터를 꺼낸다.
-    var expenseHistory = localStorage.getItem('expenseHistory');
-
+    setName(JSON.parse(localStorage.getItem('name')))
+    setFirstUnit(JSON.parse(localStorage.getItem('firstUnit')))
+    setSecondUnit(JSON.parse(localStorage.getItem('secondUnit')))
+    setInitExpenses1(JSON.parse(localStorage.getItem('initExpenses1')))
+    setInitExpenses2(JSON.parse(localStorage.getItem('initExpenses2')))
+    setRestExpenses1(JSON.parse(localStorage.getItem('restExpenses1')))
+    setRestExpenses2(JSON.parse(localStorage.getItem('restExpenses2')))
+    var local_expenseHistory = localStorage.getItem('expenseHistory')
+    
     // 최초 접속시 localStorage에 데이터가 없을 경우 새로운 배열을 생성한다. 
-    if(expenseHistory == null){
-      expenseHistory = [];
+    if(local_expenseHistory == null){ // 이 부분 굳이 필요없을지도? 기본적으로 state로 선언해놓았잖아.
+      local_expenseHistory = []
     }else{
-      expenseHistory = JSON.parse(expenseHistory);
+      local_expenseHistory = JSON.parse(local_expenseHistory)
+      setExpenseHistory(local_expenseHistory)
     }
 
   },[]);
@@ -71,6 +85,7 @@ function App() {
 
     // expenseHistory 배열에 추가
     expenseHistory.unshift({
+      id:Date.now(),
       isPlus:isPlus,
       memo:memo,
       date:date,
@@ -156,46 +171,54 @@ function App() {
   
   // onBlur : 다른 Unit 계산
   function handleBlurInitExpenses(e){
-    if (e.target.id === "initExpenses1"){
-      let f, s
-      [f, s] = exchange1to2(initExpenses1, initExpenses2)
-      setInitExpenses1(f) // 초기 경비
-      setInitExpenses2(s)
-      setRestExpenses1(f) // 남은 경비
-      setRestExpenses2(s)
-    }
-    else if(e.target.id === "initExpenses2") {
-      let f, s
-      [f, s] = exchange2to1(initExpenses1, initExpenses2)
-      setInitExpenses1(f)
-      setInitExpenses2(s)
+    if (initExpenses1 !== '' && initExpenses2 !== ''){
+      if (e.target.id === "initExpenses1"){
+        let f, s
+        [f, s] = exchange1to2(initExpenses1, initExpenses2)
+        setInitExpenses1(f) // 초기 경비
+        setInitExpenses2(s)
+        setRestExpenses1(f) // 남은 경비
+        setRestExpenses2(s)
+      }
+      else if(e.target.id === "initExpenses2") {
+        let f, s
+        [f, s] = exchange2to1(initExpenses1, initExpenses2)
+        setInitExpenses1(f)
+        setInitExpenses2(s)
+      }
     }
   }
   function handleBlurExpense(e){
-    if (e.target.id === "expense1"){
-      let f, s
-      [f, s] = exchange1to2(expense1, expense2)
-      setExpense1(f)
-      setExpense2(s)
-      if (isPlus === false){
-        setExpectRestExpenses1(restExpenses1 - f)
-        setExpectRestExpenses2(restExpenses2 - s)
-      } else if (isPlus === true) {
-        setExpectRestExpenses1(restExpenses1 + f)
-        setExpectRestExpenses2(restExpenses2 + s)
+    if (expense1 !== '' && expense2 !== ''){
+      if (e.target.id === "expense1"){
+        let f, s
+        [f, s] = exchange1to2(expense1, expense2)
+        console.log("exchange f and s:",f,s)
+        setExpense1(f)
+        setExpense2(s)
+        if (isPlus === false){
+          setExpectRestExpenses1(restExpenses1 - f)
+          setExpectRestExpenses2(restExpenses2 - s)
+        } else if (isPlus === true) {
+          setExpectRestExpenses1(restExpenses1 + f)
+          setExpectRestExpenses2(restExpenses2 + s)
+        }
       }
-    }
-    else if(e.target.id === "expense2") {
-      let f, s
-      [f, s] = exchange2to1(expense1, expense2)
-      setExpense1(f)
-      setExpense2(s)
-      if (isPlus === false){
-        setExpectRestExpenses1(restExpenses1 - f)
-        setExpectRestExpenses2(restExpenses2 - s)
-      } else if (isPlus === true) {
-        setExpectRestExpenses1(restExpenses1 + f)
-        setExpectRestExpenses2(restExpenses2 + s)
+      else if(e.target.id === "expense2") {
+        let f, s
+        [f, s] = exchange2to1(expense1, expense2)
+        console.log("exchange f and s:",f,s)
+
+        setExpense1(f)
+        setExpense2(s)
+        
+        if (isPlus === false){
+          setExpectRestExpenses1(restExpenses1 - f)
+          setExpectRestExpenses2(restExpenses2 - s)
+        } else if (isPlus === true) {
+          setExpectRestExpenses1(restExpenses1 + f)
+          setExpectRestExpenses2(restExpenses2 + s)
+        }
       }
     }
   }
@@ -230,7 +253,7 @@ function App() {
       <header className="flex flex-row p-3 font-bold text-lg bg-teal-400 text-teal-900 rounded-b-xl shadow-md">
         여행경비 계산기
         <button onClick={()=>setIsInfoOpen(true)} className="ml-3">
-          <img src="info.png"/>
+          <img src="info.png" alt="info"/>
         </button>
       </header>
       <div className="p-4">
@@ -291,15 +314,17 @@ function App() {
           </div>
           <div className="mb-6">
             <label htmlFor="default-input" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"></label>
-            <input id="initExpenses2" value={initExpenses2} onFocus={handleFocusInitExpenses} onBlur={handleBlurInitExpenses} onChange={(e)=>{setInitExpenses2(e.target.value)}} type="number" step="0.01" placeholder="단위 2" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
+            <input id="initExpenses2" value={initExpenses2} onFocus={handleFocusInitExpenses} onBlur={handleBlurInitExpenses} onChange={(e)=>setInitExpenses2(e.target.value)} type="number" step="0.01" placeholder="단위 2" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"/>
           </div>
         </div>
       </div>
         {/* 추가-사용 금액 계산 */}
         <div className="bg-gray-100 p-4">
           <p className="px-2 py-1 font-bold text-lg">추가-사용 금액 계산</p>
-          <div className="flex flex-cols-2">
-            <div className="flex flex-col mr-2">
+          <div className="grid grid-cols-8"> 
+          {/* flex flex-cols-2 */}
+            {/* +, - 버튼 */}
+            <div className="col-span-1 mr-2">
               <button onClick={()=>setIsPlus(true)} className="p-1">
                 <img src={isPlus?'plus.png':'plus_gray.png'} alt="plusBtnImg"/>
               </button>
@@ -307,12 +332,14 @@ function App() {
                 <img src={isPlus?'minus_gray.png':'minus.png'} alt="minusBtnImg"/>
               </button>
             </div>
-            <div>
+            {/* Input Box */}
+            <div className="col-span-7">
               <input value={memo} onChange={(e)=>setMemo(e.target.value)} type="text" placeholder="메모" aria-label="memo" className="border-b border-gray-500 bg-transparent text-gray-700 mr-3 py-1 px-2 w-full focus:outline-none"/>
-              <div className="flex flex-row">
-                <input id="expense1" value={expense1} onFocus={handleFocusExpense} onBlur={handleBlurExpense} onChange={(e)=>setExpense1(e.target.value)} type="number" step="0.01" placeholder="단위 1" aria-label="unit1" className="border-b border-gray-500 bg-transparent text-gray-700 mr-2 py-1 px-2 w-36 focus:outline-none"/>
-                <p className="pt-1">or</p>
-                <input id="expense2" value={expense2} onFocus={handleFocusExpense} onBlur={handleBlurExpense} onChange={(e)=>setExpense2(e.target.value)} type="number" step="0.01" placeholder="단위 2" aria-label="unit2" className="border-b border-gray-500 bg-transparent text-gray-700 ml-2 py-1 px-2 w-36 focus:outline-none"/>
+              <div className="grid grid-cols-11 text-center">
+                {/* w-36 */}
+                <input id="expense1" value={expense1} onFocus={handleFocusExpense} onBlur={handleBlurExpense} onChange={(e)=>setExpense1(e.target.value)} type="number" step="0.01" placeholder="단위 1" aria-label="unit1" className="col-span-5 border-b border-gray-500 bg-transparent text-gray-700 py-1 px-2 focus:outline-none"/> 
+                <p className="col-span-1 pt-1">or</p>
+                <input id="expense2" value={expense2} onFocus={handleFocusExpense} onBlur={handleBlurExpense} onChange={(e)=>setExpense2(e.target.value)} type="number" step="0.01" placeholder="단위 2" aria-label="unit2" className="col-span-5 border-b border-gray-500 bg-transparent text-gray-700 py-1 px-2 focus:outline-none"/>
               </div>
             </div>
           </div>
@@ -320,7 +347,6 @@ function App() {
             경비
             <NumericFormat value={expectRestExpenses1} allowLeadingZeros thousandSeparator="," className="col-span-3 bg-transparent" />
             <NumericFormat value={expectRestExpenses2} allowLeadingZeros thousandSeparator="," className="col-span-3 bg-transparent" />
-            {/* <p>{expectRestExpenses1}</p><p>{expectRestExpenses2}</p> */}
           </div>
           <div className="flex">
             <button onClick={addExpense} className="ml-auto bg-white p-2 rounded-xl">추가하기</button>
@@ -333,7 +359,7 @@ function App() {
               <img src={history.isPlus?'plus2.png':'minus2.png'} alt="isPlus" className=" object-scale-down px-2"/>
               <p>{history.memo}</p>
               <p className="text-gray-300">{history.date}</p>
-              <button onClick={deleteHistory} className="delete"></button>
+              <button onClick={()=>deleteHistory(history)} className="delete"></button>
             </div>
             <div className="grid grid-cols-2">
               <NumericFormat value={history.unit_1} allowLeadingZeros thousandSeparator="," className="text-center" />
@@ -349,8 +375,6 @@ function App() {
             <div className="grid grid-cols-2 p-2 text-lg font-bold">
               <NumericFormat value={restExpenses1} allowLeadingZeros thousandSeparator="," className="text-center" />
               <NumericFormat value={restExpenses2} allowLeadingZeros thousandSeparator="," className="text-center"/>
-              {/* <p>{restExpenses1}</p>
-              <p>{restExpenses2}</p> */}
             </div>
             <button onClick={save} className="rounded-lg bg-cyan-500 text-white p-2 m-1 w-80 shadow-lg">저장하기</button>
           </div>
