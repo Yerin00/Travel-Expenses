@@ -185,6 +185,8 @@ function App() {
         [f, s] = exchange2to1(initExpenses1, initExpenses2)
         setInitExpenses1(f)
         setInitExpenses2(s)
+        setRestExpenses1(f) // 남은 경비
+        setRestExpenses2(s)
       }
     }
   }
